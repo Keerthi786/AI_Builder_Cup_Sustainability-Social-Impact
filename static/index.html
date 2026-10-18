@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HydroResilience AI — Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        .hero { background: linear-gradient(135deg, #0d6efd, #0dcaf0); color: white; padding: 2.5rem 1rem; border-radius: 0 0 16px 16px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+<div class="hero text-center">
+    <h1 class="fw-bold">🌊 HydroResilience AI</h1>
+    <p class="lead">Urban Flood Resilience & Climate Emergency Intelligence Copilot</p>
+    <div>
+        <span class="badge bg-light text-dark px-3 py-2">Gemini 2.5</span>
+        <span class="badge bg-dark px-3 py-2">Google Cloud Run</span>
+        <span class="badge bg-warning text-dark px-3 py-2">Firestore DB</span>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row g-4">
+        <!-- AI Risk Assessment Form -->
+        <div class="col-md-6">
+            <div class="card p-4 h-100">
+                <h4 class="fw-bold text-primary mb-3">⚡ Ask Gemini Climate Copilot</h4>
+                <form id="riskForm">
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Target Location</label>
+                        <input type="text" id="location" class="form-control" value="Sector 4 - Lowland Zone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estimated 24h Rainfall (mm)</label>
+                        <input type="number" id="rainfall" class="form-control" value="110" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observed Local Hazards</label>
+                        <textarea id="hazards" class="form-control" rows="3">Street drains overflowing, water accumulating near electrical transformers.</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Generate AI Risk Assessment</button>
+                </form>
+
+                <div id="aiOutput" class="mt-4 p-3 bg-light border rounded d-none">
+                    <h6 class="fw-bold text-dark">🤖 Gemini Assessment & Action Plan:</h6>
+                    <p id="aiText" class="mb-0 text-secondary" style="white-space: pre-line;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Community Hazard Reporting Form -->
+        <div class="col-md-6">
+            <div class="card p-4 h-100">
+                <h4 class="fw-bold text-success mb-3">📡 Submit Community Hazard Report</h4>
+                <form id="reportForm">
+                    <div class="mb-3">
+                        <label class="form-label">Location</label>
+                        <input type="text" id="reportLocation" class="form-control" value="Sector 4 - Lowland Zone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Water Depth Level</label>
+                        <select id="waterDepth" class="form-select">
+                            <option value="Ankle Deep">Ankle Deep</option>
+                            <option value="Knee Deep" selected>Knee Deep</option>
+                            <option value="Waist Deep or Above">Waist Deep or Above</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description / Situation</label>
+                        <textarea id="reportDesc" class="form-control" rows="3">Road blocked due to 2 feet waterlogging.</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Log to Firestore Database</button>
+                </form>
+
+                <div id="reportOutput" class="mt-4 alert alert-success d-none"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('riskForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const aiOutput = document.getElementById('aiOutput');
+        const aiText = document.getElementById('aiText');
+        aiOutput.classList.remove('d-none');
+        aiText.innerText = "Analyzing climate inputs with Gemini on Vertex AI...";
+
+        const res = await fetch('/api/assess-risk', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                location: document.getElementById('location').value,
+                rainfall_mm: parseInt(document.getElementById('rainfall').value),
+                hazards: document.getElementById('hazards').value
+            })
+        });
+        const data = await res.json();
+        aiText.innerText = data.ai_risk_assessment;
+    });
+
+    document.getElementById('reportForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const output = document.getElementById('reportOutput');
+        
+        const res = await fetch('/api/report-incident', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                location: document.getElementById('reportLocation').value,
+                water_depth: document.getElementById('waterDepth').value,
+                description: document.getElementById('reportDesc').value
+            })
+        });
+        const data = await res.json();
+        output.classList.remove('d-none');
+        output.innerText = data.message;
+    });
+</script>
+</body>
+</html>
