@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+
+# Environment / Credentials
+.env
+*.json
+service-account-key.json
+
+# IDEs
+.vscode/
+.idea/
